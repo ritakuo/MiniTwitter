@@ -94,17 +94,7 @@ public class UserController {
 
 
         List<UserSummary> rtnList = new ArrayList<>();
-//        for(FollowRelation follower: followRepository.findAll()){
-//            System.out.println(follower.getFrom().getId());
-//            System.out.println(follower.getTo().getId());
-//            if(follower.getTo().getId() == currentUser.getId()){
-//                User oneFollower = follower.getFrom();
-//                UserSummary userSummary = new UserSummary(oneFollower.getId(), oneFollower.getUsername(), oneFollower.getName());
-//                rtnList.add(userSummary);
-//
-//            }
-//
-//        }
+
         for(FollowRelation follower: followRepository.findByTo(user)){
                 User oneFollower = follower.getFrom();
                 UserSummary userSummary = new UserSummary(oneFollower.getId(), oneFollower.getUsername(), oneFollower.getName());
@@ -126,36 +116,8 @@ public class UserController {
         User curUser = userRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "username", currentUser.getName()));
         return userService.follow(curUser, folowRequest);
-
-
-//        User followedUser = userRepository.findByUsername(username)
-//                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
-//
-//
-//        followedUser.getFollowers().add(curUser);
-//        curUser.getFollowing().add(followedUser);
-//        return followedUser.getFollowers();
+        
     }
 
-
-//    @PostMapping
-//    @PreAuthorize("hasRole('USER')")
-//    public ResponseEntity<?> following(@Valid @RequestBody TweetRequest tweetRequest) {
-//        Tweet tweet = tweetService.createTweet(tweetRequest);
-//
-//        URI location = ServletUriComponentsBuilder
-//                .fromCurrentRequest().path("/{tweetId}")
-//                .buildAndExpand(tweet.getId()).toUri();
-//
-//        return ResponseEntity.created(location)
-//                .body(new ApiResponse(true, "Tweet Created Successfully"));
-//    }
-//
-//
-//    @GetMapping("/{tweetId}")
-//    public TweetResponse getTweetById(@CurrentUser UserPrincipal currentUser,
-//                                      @PathVariable Long tweetId) {
-//        return tweetService.getTweetById(tweetId, currentUser);
-//    }
 
 }

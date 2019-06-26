@@ -38,15 +38,9 @@ public class TweetController {
 
     private static final Logger logger = LoggerFactory.getLogger(TweetController.class);
 
-    @GetMapping
-    public PagedResponse<TweetResponse> getPolls(@CurrentUser UserPrincipal currentUser,
-                                                 @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
-                                                 @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
-        return tweetService.getAllTweets(currentUser, page, size);
-    }
+
     @PostMapping
     @PreAuthorize("hasRole('USER')")
-    @ApiOperation(value = "Create post" , authorizations = {@Authorization(value = "Bearer")})
     public ResponseEntity<?> createTweet(@Valid @RequestBody TweetRequest tweetRequest) {
         Tweet tweet = tweetService.createTweet(tweetRequest);
 
@@ -63,6 +57,18 @@ public class TweetController {
                                     @PathVariable Long tweetId) {
         return tweetService.getTweetById(tweetId, currentUser);
     }
+    @GetMapping("/_all")
+    public PagedResponse<TweetResponse>  getAllTweets(@RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+                                      @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
+        return tweetService.getAllTweets(page, size);
+    }
+    @GetMapping("/following")
+    public PagedResponse<TweetResponse> getPolls(@CurrentUser UserPrincipal currentUser,
+                                                 @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+                                                 @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
+        return tweetService.getTweetsFromFollowing(currentUser, page, size);
+    }
+
 
 
 

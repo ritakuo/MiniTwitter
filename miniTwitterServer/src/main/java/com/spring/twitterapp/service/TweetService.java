@@ -3,10 +3,13 @@ package com.spring.twitterapp.service;
 import com.spring.twitterapp.Payload.PagedResponse;
 import com.spring.twitterapp.Payload.TweetRequest;
 import com.spring.twitterapp.Payload.TweetResponse;
+import com.spring.twitterapp.Payload.UserSummary;
 import com.spring.twitterapp.exception.BadRequestException;
 import com.spring.twitterapp.exception.ResourceNotFoundException;
+import com.spring.twitterapp.model.FollowRelation;
 import com.spring.twitterapp.model.Tweet;
 import com.spring.twitterapp.model.User;
+import com.spring.twitterapp.repository.FollowRepository;
 import com.spring.twitterapp.repository.TweetRepository;
 import com.spring.twitterapp.repository.UserRepository;
 import com.spring.twitterapp.security.UserPrincipal;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -39,9 +43,13 @@ public class TweetService {
     private TweetRepository tweetRepository;
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private FollowRepository followRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(TweetService.class);
 
-    public PagedResponse<TweetResponse> getAllTweets(UserPrincipal currentUser, int page, int size) {
+    public PagedResponse<TweetResponse> getAllTweets(int page, int size) {
         validatePageNumberAndSize(page, size);
 
         // Retrieve Tweets
@@ -53,7 +61,6 @@ public class TweetService {
                     tweets.getSize(), tweets.getTotalElements(), tweets.getTotalPages(), tweets.isLast());
         }
 
-        List<Long> tweetIds = tweets.map(Tweet::getId).getContent();
         Map<Long, User> creatorMap = getTweetCreatorMap(tweets.getContent());
 
         List<TweetResponse> tweetResponses = tweets.map(tweet -> {
@@ -63,6 +70,34 @@ public class TweetService {
 
         return new PagedResponse<>(tweetResponses, tweets.getNumber(),
                 tweets.getSize(), tweets.getTotalElements(), tweets.getTotalPages(), tweets.isLast());
+    }
+
+    public PagedResponse<TweetResponse> getTweetsFromFollowing(UserPrincipal currentUser, int page, int size){
+        validatePageNumberAndSize(page, size);
+
+        //get all the following
+        User user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", currentUser.getName()));
+        List<Long> followings_ids = new ArrayList<>();
+        for(FollowRelation following: followRepository.findByFrom(user)){
+            User oneFollowing = following.getTo();
+            followings_ids.add(oneFollowing.getId());
+        }
+
+        // Retrieve Tweets
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+        Page<Tweet> tweets = tweetRepository.findByCreatedByIn(followings_ids, pageable);
+
+        Map<Long, User> creatorMap = getTweetCreatorMap(tweets.getContent());
+
+        List<TweetResponse> tweetResponses = tweets.map(tweet -> {
+            return ModelMapper.mapTweetToTweetResponse(tweet,
+                    creatorMap.get(tweet.getCreatedBy()));
+        }).getContent();
+        return new PagedResponse<>(tweetResponses, tweets.getNumber(),
+                tweets.getSize(), tweets.getTotalElements(), tweets.getTotalPages(), tweets.isLast());
+
+
     }
     public PagedResponse<TweetResponse> getTweetCreatedBy(String username, UserPrincipal currentUser, int page, int size) {
         validatePageNumberAndSize(page, size);
@@ -78,9 +113,6 @@ public class TweetService {
             return new PagedResponse<>(Collections.emptyList(), tweets.getNumber(),
                     tweets.getSize(), tweets.getTotalElements(), tweets.getTotalPages(), tweets.isLast());
         }
-
-        // Map Tweets to PollResponses containing vote counts and poll creator details
-        List<Long> tweetIds = tweets.map(Tweet::getId).getContent();
 
         List<TweetResponse> tweetResponses = tweets.map(tweet -> {
             return ModelMapper.mapTweetToTweetResponse(tweet,

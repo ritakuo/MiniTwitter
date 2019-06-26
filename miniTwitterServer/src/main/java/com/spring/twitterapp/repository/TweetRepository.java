@@ -24,4 +24,6 @@ public interface TweetRepository extends JpaRepository<Tweet, Long> {
     List<Tweet> findByIdIn(List<Long> tweetIds);
 
     List<Tweet> findByIdIn(List<Long> tweetIds, Sort sort);
+
+    Page<Tweet> findByCreatedByIn(List<Long> userIds, Pageable pageable);
 }
