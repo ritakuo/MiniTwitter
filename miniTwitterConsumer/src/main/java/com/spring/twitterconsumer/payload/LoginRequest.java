@@ -1,4 +1,4 @@
-package com.spring.twitterconsumer;
+package com.spring.twitterconsumer.payload;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -14,19 +14,19 @@ public class LoginRequest {
         this.password = password;
     }
 
-    public String getUserName() {
+    public String getusername() {
         return username;
     }
 
-    public void setUsername(String username) {
+    public void setusername(String username) {
         this.username = username;
     }
 
-    public String getPassword() {
+    public String getpassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setpassword(String password) {
         this.password = password;
     }
 }
