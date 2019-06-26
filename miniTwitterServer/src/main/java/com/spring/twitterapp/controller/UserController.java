@@ -116,7 +116,7 @@ public class UserController {
         User curUser = userRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "username", currentUser.getName()));
         return userService.follow(curUser, folowRequest);
-        
+
     }
 
 

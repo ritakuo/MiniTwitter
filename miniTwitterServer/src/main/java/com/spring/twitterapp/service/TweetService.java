@@ -86,7 +86,7 @@ public class TweetService {
 
         // Retrieve Tweets
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-        Page<Tweet> tweets = tweetRepository.findByCreatedByIn(followings_ids, pageable);
+        Page<Tweet> tweets = tweetRepository.findTop100ByCreatedByIn(followings_ids, pageable);
 
         Map<Long, User> creatorMap = getTweetCreatorMap(tweets.getContent());
 

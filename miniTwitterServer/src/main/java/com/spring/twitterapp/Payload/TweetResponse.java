@@ -10,7 +10,9 @@ import java.time.Instant;
 public class TweetResponse {
     private Long id;
     private String content;
-    private UserSummary createdBy;
+    private String createdBy;
+
+//    private UserSummary createdBy;
     private Instant creationDateTime;
 
     public String getContent() {
@@ -29,13 +31,20 @@ public class TweetResponse {
         this.id = id;
     }
 
-    public UserSummary getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(UserSummary createdBy) {
+    public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+    //    public UserSummary getCreatedBy() {
+//        return createdBy;
+//    }
+//
+//    public void setCreatedBy(UserSummary createdBy) {
+//        this.createdBy = createdBy;
+//    }
 
 
     public Instant getCreationDateTime() {

@@ -18,8 +18,10 @@ public class ModelMapper {
         tweetResponse.setContent(tweet.getContent());
         tweetResponse.setCreationDateTime(tweet.getCreatedAt());
 
-        UserSummary creatorSummary = new UserSummary(creator.getId(), creator.getUsername(), creator.getName());
-        tweetResponse.setCreatedBy(creatorSummary);
+//        UserSummary creatorSummary = new UserSummary(creator.getId(), creator.getUsername(), creator.getName());
+//        tweetResponse.setCreatedBy(creatorSummary);
+
+        tweetResponse.setCreatedBy(creator.getName());
 
 
         return tweetResponse;

@@ -11,6 +11,7 @@ public class FollowRequest {
     @Size(max = 140)
     private String username_to_follow;
 
+
     public String getUsername_to_follow() {
         return username_to_follow;
     }
