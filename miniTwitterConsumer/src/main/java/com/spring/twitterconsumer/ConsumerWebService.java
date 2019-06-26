@@ -5,6 +5,7 @@ import com.spring.twitterconsumer.payload.FollowRequest;
 import com.spring.twitterconsumer.payload.SignInAndFollowRequest;
 import com.spring.twitterconsumer.payload.LoginRequest;
 import com.spring.twitterconsumer.payload.SignUpRequest;
+//import com.spring.twitterconsumer.security.UserPrincipal;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,20 +35,10 @@ public class ConsumerWebService {
 //    private String remoteServerPort;
 
     private String remoteServerbaseURL="http://localhost:8080";
-//    private String remoteServerbaseURL="http://demoserver.kuorita.com";
+    //private String remoteServerbaseURL="http://demoserver.kuorita.com";
 
     private static final Logger logger = LoggerFactory.getLogger(ConsumerWebService.class);
-    
 
-    @GetMapping(value = "/users/{username}/tweet")
-    public String getUserTweetList(@PathVariable("username") String username) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        HttpEntity<String> entity = new HttpEntity<String>(headers);
-
-        return restTemplate.exchange(
-                remoteServerbaseURL +"/api/users/"+ username+"/tweets", HttpMethod.GET, entity, String.class).getBody();
-    }
 
     @PostMapping(value = "/signin")
     public ResponseEntity<String> signIn(@Valid @RequestBody LoginRequest loginRequest) {
@@ -67,35 +58,6 @@ public class ConsumerWebService {
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
         System.out.println(response.getBody());
         return response;
-    }
-    HttpHeaders createHeadersWithJWT (String username, String password){
-        return new HttpHeaders() {{
-            //get the authorization bearer response
-            setContentType(MediaType.APPLICATION_JSON);
-            String token = getJWTToken(username, password);
-
-            set( "Authorization", "Bearer "+ token);
-        }};
-    }
-    public String getJWTToken(String username, String password) {
-        String url = remoteServerbaseURL +"/api/auth/signin";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        ObjectMapper mapper = new ObjectMapper();
-
-        String requestJson="";
-        LoginRequest loginRequest = new LoginRequest(username, password);
-        try{
-            requestJson = mapper.writeValueAsString(loginRequest);
-            System.out.println(requestJson);
-        }catch(Exception e){
-            logger.error(e.toString());
-        }
-        HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
-        String token = response.getBody().split(",")[0].split(":")[1].replaceAll("^\"|\"$", "");
-        logger.info("token: " + token);
-        return token;
     }
 
     @PostMapping(value = "/signup")
@@ -118,13 +80,11 @@ public class ConsumerWebService {
         return response;
     }
 
-    @PostMapping(value = "/follow")
-    public ResponseEntity<String> callSecureService(@Valid @RequestBody SignInAndFollowRequest signInAndFollowRequest) {
+    //sets the context that User A (Logged in User) is following User B.
+    @PutMapping(value = "/follow")
+    public ResponseEntity<String> signInAndFollow(@Valid @RequestBody FollowRequest followRequest,
+                                                  @RequestHeader(value="Authorization") String authorizationHeader) {
         String url = remoteServerbaseURL +"/api/users/follow";
-        String username = signInAndFollowRequest.getUsername();
-        String password = signInAndFollowRequest.getPassword();
-
-        FollowRequest followRequest = new FollowRequest(signInAndFollowRequest.getUsername_to_follow());
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -134,9 +94,101 @@ public class ConsumerWebService {
         }catch(Exception e){
             logger.error(e.toString());
         }
-        HttpEntity<String> entity = new HttpEntity<String>(requestJson, createHeadersWithJWT(username,password));
+        HttpEntity<String> entity = new HttpEntity<String>(requestJson, createHeadersWithToken(authorizationHeader));
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
         return response;
     }
+
+    //To list all the followers for the logged in user
+    @GetMapping(value = "/followers")
+    public String signInAndGetFollowers(@RequestHeader(value="Authorization") String authorizationHeader) {
+        String url = remoteServerbaseURL +"/api/users/followers";
+
+        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithToken(authorizationHeader));
+
+        return restTemplate.exchange(
+                url, HttpMethod.GET, entity, String.class).getBody();
+    }
+
+    //To list 100 recent tweets for the logged in user.
+    @GetMapping(value = "/feed")
+    public String signInAndGetFeed(@RequestHeader(value="Authorization") String authorizationHeader) {
+        String url = remoteServerbaseURL +"/api/tweets/following";
+        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithToken(authorizationHeader));
+
+        return restTemplate.exchange(
+                url, HttpMethod.GET, entity, String.class).getBody();
+    }
+
+
+    public String getJWTToken(String username, String password) {
+        String url = remoteServerbaseURL +"/api/auth/signin";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ObjectMapper mapper = new ObjectMapper();
+
+        String requestJson="";
+        LoginRequest loginRequest = new LoginRequest(username, password);
+        try{
+            requestJson = mapper.writeValueAsString(loginRequest);
+            System.out.println(requestJson);
+        }catch(Exception e){
+            logger.error(e.toString());
+        }
+        HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+        String token = response.getBody().split(",")[0].split(":")[1].replaceAll("^\"|\"$", "");
+        logger.info("token: " + token);
+        return token;
+    }
+
+    HttpHeaders createHeadersWithToken (String token){
+        return new HttpHeaders() {{
+            //get the authorization bearer response
+            setContentType(MediaType.APPLICATION_JSON);
+
+            set( "Authorization", token);
+        }};
+    }
+
+
+    @GetMapping(value = "/users/{username}/tweet")
+    public String getUserTweetList(@PathVariable("username") String username) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        HttpEntity<String> entity = new HttpEntity<String>(headers);
+
+        return restTemplate.exchange(
+                remoteServerbaseURL +"/api/users/"+ username+"/tweets", HttpMethod.GET, entity, String.class).getBody();
+    }
+
+    //not used
+    HttpHeaders createHeadersWithJWT (String username, String password){
+        return new HttpHeaders() {{
+            //get the authorization bearer response
+            setContentType(MediaType.APPLICATION_JSON);
+            String token = getJWTToken(username, password);
+
+            set( "Authorization", "Bearer "+ token);
+        }};
+    }
+
+
+    //    //get news feed for that user with login request
+//    @PostMapping(value = "/feed")
+//    public String signInAndGetFeed(@Valid @RequestBody LoginRequest loginRequest) {
+//        String url = remoteServerbaseURL +"/api/tweets/following";
+//        String username = loginRequest.getusername();
+//        String password = loginRequest.getpassword();
+//
+//        HttpEntity<String> entity = new HttpEntity<String>(createHeadersWithJWT(username,password));
+//        return restTemplate.exchange(
+//                url, HttpMethod.GET, entity, String.class).getBody();
+//    }
+
+    //https://stackoverflow.com/questions/21101250/sending-get-request-with-authentication-headers-using-resttemplate
+    //https://stackoverflow.com/questions/4615039/spring-security-authentication-using-resttemplate
+    //REading HTTP request header http://appsdeveloperblog.com/read-http-request-header-in-spring-mvc/
+
 
 }

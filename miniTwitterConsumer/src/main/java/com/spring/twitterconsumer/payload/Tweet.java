@@ -1,4 +1,4 @@
-package com.spring.twitterconsumer;
+package com.spring.twitterconsumer.payload;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
