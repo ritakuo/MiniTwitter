@@ -16,6 +16,7 @@ import org.apache.tomcat.jni.Poll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -57,18 +58,34 @@ public class TweetController {
                                     @PathVariable Long tweetId) {
         return tweetService.getTweetById(tweetId, currentUser);
     }
+    @DeleteMapping("/{tweetId}")
+    public ResponseEntity<Object> deleteTweetById(@CurrentUser UserPrincipal currentUser,
+                                                  @PathVariable Long tweetId) {
+        if (tweetService.deleteTweetById(tweetId, currentUser))
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse(true, "Tweet deleted Successfully"));
+        else{
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(new ApiResponse(true, "Unable to delete tweet"));
+
+        }
+    }
     @GetMapping("/_all")
     public PagedResponse<TweetResponse>  getAllTweets(@RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                       @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
         return tweetService.getAllTweets(page, size);
     }
     @GetMapping("/following")
-    public PagedResponse<TweetResponse> getPolls(@CurrentUser UserPrincipal currentUser,
+    public PagedResponse<TweetResponse> getTweetsFromFollowing(@CurrentUser UserPrincipal currentUser,
                                                  @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                                  @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
         return tweetService.getTweetsFromFollowing(currentUser, page, size);
     }
 
+    @GetMapping("/me")
+    public PagedResponse<TweetResponse> getOwnTweets(@CurrentUser UserPrincipal currentUser,
+                                                 @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+                                                 @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
+        return tweetService.getOwnTweets(currentUser, page, size);
+    }
 
 
 

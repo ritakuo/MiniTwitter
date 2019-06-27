@@ -45,20 +45,20 @@ public class UserController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    @GetMapping("/user/me")
+    @GetMapping("/users/me")
     @PreAuthorize("hasRole('USER')")
     public UserSummary getCurrentUser(@CurrentUser UserPrincipal currentUser) {
         UserSummary userSummary = new UserSummary(currentUser.getId(), currentUser.getUsername(), currentUser.getName());
         return userSummary;
     }
 
-    @GetMapping("/user/checkUsernameAvailability")
+    @GetMapping("/users/checkUsernameAvailability")
     public UserIdentityAvailability checkUsernameAvailability(@RequestParam(value = "username") String username) {
         Boolean isAvailable = !userRepository.existsByUsername(username);
         return new UserIdentityAvailability(isAvailable);
     }
 
-    @GetMapping("/user/checkEmailAvailability")
+    @GetMapping("/users/checkEmailAvailability")
     public UserIdentityAvailability checkEmailAvailability(@RequestParam(value = "email") String email) {
         Boolean isAvailable = !userRepository.existsByEmail(email);
         return new UserIdentityAvailability(isAvailable);

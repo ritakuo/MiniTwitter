@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -99,6 +100,27 @@ public class TweetService {
 
 
     }
+    public PagedResponse<TweetResponse> getOwnTweets(UserPrincipal currentUser, int page, int size){
+        validatePageNumberAndSize(page, size);
+
+        User user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", currentUser.getName()));
+
+        // Retrieve Tweets
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+        Page<Tweet> tweets = tweetRepository.findByCreatedBy(user.getId(), pageable);
+
+        Map<Long, User> creatorMap = getTweetCreatorMap(tweets.getContent());
+
+        List<TweetResponse> tweetResponses = tweets.map(tweet -> {
+            return ModelMapper.mapTweetToTweetResponse(tweet,
+                    creatorMap.get(tweet.getCreatedBy()));
+        }).getContent();
+        return new PagedResponse<>(tweetResponses, tweets.getNumber(),
+                tweets.getSize(), tweets.getTotalElements(), tweets.getTotalPages(), tweets.isLast());
+
+    }
+
     public PagedResponse<TweetResponse> getTweetCreatedBy(String username, UserPrincipal currentUser, int page, int size) {
         validatePageNumberAndSize(page, size);
 
@@ -138,6 +160,17 @@ public class TweetService {
 
         return ModelMapper.mapTweetToTweetResponse(tweet, creator);
     }
+
+    public boolean deleteTweetById(Long tweetId, UserPrincipal currentUser) {
+        Tweet tweet = tweetRepository.findById(tweetId).orElseThrow(
+                () -> new ResourceNotFoundException("Tweet", "id", tweetId));
+        if (! tweet.getCreatedBy().equals(currentUser.getId())){
+            return false;
+        }
+        tweetRepository.deleteById(tweetId);
+        return true;
+    }
+
     private void validatePageNumberAndSize(int page, int size) {
         if(page < 0) {
             throw new BadRequestException("Page number cannot be less than zero.");
