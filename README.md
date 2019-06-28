@@ -1,4 +1,4 @@
-# Mini Twitter README
+# Mini Twitter
 
 A Twitter like application where user can tweet and have followers
 
@@ -66,6 +66,9 @@ System shall provide capability for
 
 ![](https://s3-us-west-2.amazonaws.com/donot-delete-github-image/Screen+Shot+2019-06-27+at+8.58.51+PM.png)
 
+
+## Scale to 1000 user
+![](https://s3-us-west-2.amazonaws.com/donot-delete-github-image/Screen+Shot+2019-06-27+at+10.30.29+PM.png)
 
 
 
