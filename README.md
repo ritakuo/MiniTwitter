@@ -33,7 +33,7 @@ System shall provide capability for
 ### Calculation
 #### total tweet-views estimate : 2M/day 
 - assume on average a user visits their timeline two times a day. On each page if a user sees 100 tweets.
-- 10K DAU *(2* 100)=>2000k =2M/day
+- 10K DAU * (2 * 100)=>2000k =2M/day
 #### storage estimate : 31 MB/day
 - Assume each tweet has 140 characters and we need two bytes to store a character without compression. 
 - Assume we need 30 bytes to store metadata with each tweet 
@@ -67,7 +67,7 @@ System shall provide capability for
 ![](https://s3-us-west-2.amazonaws.com/donot-delete-github-image/Screen+Shot+2019-06-27+at+8.58.51+PM.png)
 
 
-## Scale to 1000 user
+## Scale to 10k user
 ![](https://s3-us-west-2.amazonaws.com/donot-delete-github-image/Screen+Shot+2019-06-27+at+10.30.29+PM.png)
 
 
