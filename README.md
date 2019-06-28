@@ -3,6 +3,7 @@
 A Twitter like application where user can tweet and have followers
 
 [Mini-Twitter Server API ](http://demoserver.kuorita.com/swagger-ui.html#!/)
+
 [Mini-Twitter Consumer API](http://democonsumer.kuorita.com/swagger-ui.html)
 
 ## Archetecture
