@@ -4,8 +4,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.lang.annotation.*;
 
-/**
- * creates the @currentUser annotation based on the @AuthenticationPrincipal annotion from spring
+/***
+ * Spring security provides an annotation called @AuthenticationPrincipal to access the currently authenticated user in the controllers.
+ *
+ * The following CurrentUser annotation is a wrapper around @AuthenticationPrincipal annotation.
+ * We’ve created a meta-annotation so that we don’t get too much tied up of with Spring Security related annotations everywhere in our project.
+ * This reduces the dependency on Spring Security
  */
 
 @Target({ElementType.PARAMETER, ElementType.TYPE})

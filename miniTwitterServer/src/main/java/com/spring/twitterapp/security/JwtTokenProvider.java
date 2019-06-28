@@ -14,6 +14,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
+
+/*
+    The following utility class will be used for generating a JWT after a user logs in successfully,
+    and validating the JWT sent in the Authorization header of the requests -
+ */
 @Component
 public class JwtTokenProvider {
 

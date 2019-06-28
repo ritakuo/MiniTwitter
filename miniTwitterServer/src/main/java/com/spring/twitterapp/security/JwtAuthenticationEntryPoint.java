@@ -11,6 +11,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/*
+    implementation  commence() method.
+    This method is called whenever an exception is thrown due to an unauthenticated user trying to access a resource that requires authentication.
+    In this case, we’ll simply respond with a 401 error containing the exception message.
+ */
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 

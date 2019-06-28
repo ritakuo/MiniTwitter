@@ -13,7 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 /**
- * Created by ritakuo on 6/18/19.
+ To authenticate a User or perform various role-based checks, Spring security needs to load users details somehow.
+
+ For this purpose, It consists of an interface called UserDetailsService which has a single method that loads a user based on username-
+
+ UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
+
+ this method provides implmentation for loadUserByUsername()
  */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
