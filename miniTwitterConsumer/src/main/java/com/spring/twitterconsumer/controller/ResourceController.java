@@ -86,12 +86,14 @@ public class ResourceController {
         return response;
     }
 
+
     @PutMapping(value = "/follow")
     @ApiOperation(value = "sets the context that User A (Logged in User) is following User B.")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully follow"),
             @ApiResponse(code = 404, message = "User not found")})
     public String follow(@Valid @RequestBody FollowRequest followRequest,
-                                                  @RequestHeader(value="Authorization") String authorizationHeader) {
+                                                  @RequestHeader(value="username") String username,
+                                                 @RequestHeader(value="password") String password) {
         String url = remoteServerbaseURL +"/api/users/follow";
 
         ObjectMapper mapper = new ObjectMapper();
@@ -102,7 +104,7 @@ public class ResourceController {
         }catch(Exception e){
             logger.error(e.toString());
         }
-        HttpEntity<String> entity = new HttpEntity<String>(requestJson, createHeadersWithToken(authorizationHeader));
+        HttpEntity<String> entity = new HttpEntity<String>(requestJson, createHeadersWithToken(getJWTToken(username, password)));
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
         return response.getBody();
     }
@@ -110,21 +112,36 @@ public class ResourceController {
     @GetMapping(value = "/followers")
     @ApiOperation(value = "List all the followers for the logged in user")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get followers")})
-    public String getFollowers(@RequestHeader(value="Authorization") String authorizationHeader) {
+    public String getFollowers(@RequestHeader(value="username") String username,
+                               @RequestHeader(value="password") String password) {
         String url = remoteServerbaseURL +"/api/users/followers";
 
-        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithToken(authorizationHeader));
+        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithToken(getJWTToken(username, password)));
+
+        return restTemplate.exchange(
+                url, HttpMethod.GET, entity, String.class).getBody();
+    }
+    @GetMapping(value = "/following")
+    @ApiOperation(value = "List all the followers for the logged in user")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get followers")})
+    public String getFollowings(@RequestHeader(value="username") String username,
+                                @RequestHeader(value="password") String password) {
+        String url = remoteServerbaseURL +"/api/users/following";
+
+        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithToken(getJWTToken(username, password)));
 
         return restTemplate.exchange(
                 url, HttpMethod.GET, entity, String.class).getBody();
     }
 
+
     @GetMapping(value = "/feed")
     @ApiOperation(value = "List 100 recent feed from the users followed by the logged in user")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get feed")})
-    public String getFeed(@RequestHeader(value="Authorization") String authorizationHeader) {
+    public String getFeed(@RequestHeader(value="username") String username,
+                          @RequestHeader(value="password") String password) {
         String url = remoteServerbaseURL +"/api/tweets/following";
-        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithToken(authorizationHeader));
+        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithToken(getJWTToken(username, password)));
 
         return restTemplate.exchange(
                 url, HttpMethod.GET, entity, String.class).getBody();
@@ -133,7 +150,8 @@ public class ResourceController {
     @PostMapping(value = "/feed")
     @ApiOperation(value = "Create a new tweet ")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully create new tweet")})
-    public ResponseEntity<String> createTweet(@RequestHeader(value="Authorization") String authorizationHeader, @Valid @RequestBody TweetRequest tweetRequest) {
+    public ResponseEntity<String> createTweet(@RequestHeader(value="username") String username,
+                                              @RequestHeader(value="password") String password, @Valid @RequestBody TweetRequest tweetRequest) {
 
         String url = remoteServerbaseURL +"/api/tweets";
 
@@ -145,8 +163,7 @@ public class ResourceController {
         }catch(Exception e){
             logger.error(e.toString());
         }
-        HttpEntity<String> entity = new HttpEntity<String>(requestJson, createHeadersWithToken(authorizationHeader));
-        System.out.println("line 152");
+        HttpEntity<String> entity = new HttpEntity<String>(requestJson, createHeadersWithToken(getJWTToken(username, password)));
         System.out.println(entity);
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
         return response;
@@ -157,20 +174,31 @@ public class ResourceController {
             @ApiResponse(code = 404, message = "tweet id not found"),
                     @ApiResponse(code = 405, message = "tweet id not belong to logged in user")
     })
-    public ResponseEntity<?> deleteTweet(@RequestHeader(value="Authorization") String authorizationHeader,  @PathVariable Long tweetId) {
+    public ResponseEntity<?> deleteTweet(@RequestHeader(value="username") String username,
+                                         @RequestHeader(value="password") String password,  @PathVariable Long tweetId) {
         String url = remoteServerbaseURL +"/api/tweets/" + tweetId;
-        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithToken(authorizationHeader));
+        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithToken(getJWTToken(username, password)));
         return restTemplate.exchange(
                 url, HttpMethod.DELETE, entity, String.class);
     }
 
-    //Get tweet created by login user
     @GetMapping(value = "/feed/me")
     @ApiOperation(value = "Get logged in user's own tweets")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get feed for logged in user")})
-    public String getOwnTweets(@RequestHeader(value="Authorization") String authorizationHeader) {
+    public String getOwnTweets(@RequestHeader(value="username") String username,
+                               @RequestHeader(value="password") String password) {
         String url = remoteServerbaseURL +"/api/tweets/me";
-        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithToken(authorizationHeader));
+        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithToken(getJWTToken(username, password)));
+
+        return restTemplate.exchange(
+                url, HttpMethod.GET, entity, String.class).getBody();
+    }
+    @GetMapping(value = "/feed/_all")
+    @ApiOperation(value = "Get All tweets")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get all feed")})
+    public String getAllTweets() {
+        String url = remoteServerbaseURL +"/api/tweets/_all";
+        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithoutToken());
 
         return restTemplate.exchange(
                 url, HttpMethod.GET, entity, String.class).getBody();
@@ -179,9 +207,10 @@ public class ResourceController {
     @GetMapping(value = "/users/me")
     @ApiOperation(value = "Get user profile from the login user")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get detail for the logged in user")})
-    public String getOwnProfile(@RequestHeader(value="Authorization") String authorizationHeader) {
+    public String getOwnProfile(@RequestHeader(value="username") String username,
+                                @RequestHeader(value="password") String password) {
         String url = remoteServerbaseURL +"/api/users/me";
-        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithToken(authorizationHeader));
+        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithToken(getJWTToken(username, password)));
 
         return restTemplate.exchange(
                 url, HttpMethod.GET, entity, String.class).getBody();
@@ -225,7 +254,8 @@ public class ResourceController {
         }
         HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
-        String token = response.getBody().split(",")[0].split(":")[1].replaceAll("^\"|\"$", "");
+        String token = "Bearer "+ response.getBody().split(",")[0].split(":")[1].replaceAll("^\"|\"$", "");
+
         logger.info("token: " + token);
         return token;
     }
