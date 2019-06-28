@@ -76,7 +76,7 @@ public class UserController {
         return userProfile;
     }
     @GetMapping("/users/{username}/tweets")
-    public PagedResponse<TweetResponse> getPollsCreatedBy(@PathVariable(value = "username") String username,
+    public PagedResponse<TweetResponse> getTweetsCreatedBy(@PathVariable(value = "username") String username,
                                                           @CurrentUser UserPrincipal currentUser,
                                                           @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                                           @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
@@ -104,6 +104,27 @@ public class UserController {
         return rtnList;
 
     }
+    @GetMapping("/users/following")
+    @PreAuthorize("hasRole('USER')")
+    public List<UserSummary>  getUserFollowing(@CurrentUser UserPrincipal currentUser,
+                                               @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+                                               @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
+
+        User user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", currentUser.getName()));
+
+
+        List<UserSummary> rtnList = new ArrayList<>();
+
+        for(FollowRelation following: followRepository.findByFrom(user)){
+            User oneFollowing = following.getTo();
+            UserSummary userSummary = new UserSummary(oneFollowing.getId(), oneFollowing.getUsername(), oneFollowing.getName());
+            rtnList.add(userSummary);
+        }
+
+        return rtnList;
+
+    }
 
     @PostMapping("/users/follow")
     @PreAuthorize("hasRole('USER')")
@@ -118,6 +139,13 @@ public class UserController {
         return userService.follow(curUser, folowRequest);
 
     }
+    @GetMapping("/users/_all")
+    public List<Object[]> getAllUsers(@RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+                                      @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
+        return userService.getAllUsers(page, size);
+    }
+
+
 
 
 }

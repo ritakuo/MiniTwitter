@@ -15,8 +15,6 @@ public class UserProfile {
     private String name;
     private Instant joinedAt;
     private Long tweetCount;
-    private List<FollowRelation> followers;
-    private List<FollowRelation> followings;
 
     public UserProfile(Long id, String username, String name, Instant joinedAt, Long tweetCount) {
         this.id = id;
@@ -24,25 +22,8 @@ public class UserProfile {
         this.name = name;
         this.joinedAt = joinedAt;
         this.tweetCount = tweetCount;
-        this.followers = new ArrayList<>();
-        this.followings = new ArrayList<>();
     }
 
-    public List<FollowRelation> getFollowers() {
-        return followers;
-    }
-
-    public void setFollowers(List<FollowRelation> followers) {
-        this.followers = followers;
-    }
-
-    public List<FollowRelation>  getFollowings() {
-        return followings;
-    }
-
-    public void setFollowings(List<FollowRelation> followings) {
-        this.followings = followings;
-    }
 
     public Long getId() {
         return id;

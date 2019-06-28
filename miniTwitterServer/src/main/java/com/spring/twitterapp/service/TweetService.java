@@ -181,7 +181,7 @@ public class TweetService {
         }
     }
     Map<Long, User> getTweetCreatorMap(List<Tweet> tweets) {
-        // Get Tweet Creator details of the given list of polls
+        // Get Tweet Creator details
         List<Long> creatorIds = tweets.stream()
                 .map(Tweet::getCreatedBy)
                 .distinct()
