@@ -38,14 +38,6 @@ public class TweetResponse {
     public String getCreatedBy() {
         return createdBy;
     }
-    //    public UserSummary getCreatedBy() {
-//        return createdBy;
-//    }
-//
-//    public void setCreatedBy(UserSummary createdBy) {
-//        this.createdBy = createdBy;
-//    }
-
 
     public Instant getCreationDateTime() {
         return creationDateTime;
