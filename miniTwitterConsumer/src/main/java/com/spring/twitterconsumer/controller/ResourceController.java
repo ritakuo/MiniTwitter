@@ -2,7 +2,6 @@ package com.spring.twitterconsumer.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spring.twitterconsumer.payload.*;
-//import com.spring.twitterconsumer.security.UserPrincipal;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -10,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -25,11 +23,6 @@ public class ResourceController {
     @Autowired
     RestTemplate restTemplate;
 
-//    @Value("${remoteServerUrl}")
-//    private String remoteServerURL;
-//
-//    @Value("${remoteServerPort}")
-//    private String remoteServerPort;
 
     //private String remoteServerbaseURL="http://localhost:8080";
     private String remoteServerbaseURL="http://demoserver.kuorita.com";
@@ -275,45 +268,4 @@ public class ResourceController {
 
         }};
     }
-
-//
-//    //not used
-//    HttpHeaders createHeadersWithJWT (String username, String password){
-//        return new HttpHeaders() {{
-//            //get the authorization bearer response
-//            setContentType(MediaType.APPLICATION_JSON);
-//            String token = getJWTToken(username, password);
-//
-//            set( "Authorization", "Bearer "+ token);
-//        }};
-//    }
-
-
-    //    //get news feed for that user with login request
-//    @PostMapping(value = "/feed")
-//    public String signInAndGetFeed(@Valid @RequestBody LoginRequest loginRequest) {
-//        String url = remoteServerbaseURL +"/api/tweets/following";
-//        String username = loginRequest.getusername();
-//        String password = loginRequest.getpassword();
-//
-//        HttpEntity<String> entity = new HttpEntity<String>(createHeadersWithJWT(username,password));
-//        return restTemplate.exchange(
-//                url, HttpMethod.GET, entity, String.class).getBody();
-//    }
-
-    //https://stackoverflow.com/questions/21101250/sending-get-request-with-authentication-headers-using-resttemplate
-    //https://stackoverflow.com/questions/4615039/spring-security-authentication-using-resttemplate
-    //REading HTTP request header http://appsdeveloperblog.com/read-http-request-header-in-spring-mvc/
-
-
-//
-//    //To list 100 recent tweets for the logged in user.
-//    @PostMapping(value = "/feed")
-//    public String signInAndGetFeed(@RequestHeader(value="Authorization") String authorizationHeader) {
-//        String url = remoteServerbaseURL +"/api/tweets/following";
-//        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithToken(authorizationHeader));
-//
-//        return restTemplate.exchange(
-//                url, HttpMethod.GET, entity, String.class).getBody();
-//    }
 }
